@@ -37,3 +37,11 @@ The tool will change the following organization settings, under "Code security a
 ### After activation
 
 ![After activation](./images/after-activation.png)
+
+## Token scopes
+
+the PAT token needs following scopes:
+
+`admin:org`, `read:enterprise`
+
+The former allows changing organization settings and the latter is used to list all organizations in the enterprise.
