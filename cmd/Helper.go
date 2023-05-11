@@ -64,6 +64,7 @@ func ListSecretScanning(enterprise, organization, token, url string, activate bo
 
 		repos, err := github.GetRepositories(organization, token, url)
 		totalRepos += len(repos)
+		log.Println("Total repositories found in organization: ", len(repos))
 
 		if err != nil {
 			log.Println("[❌] Error listing repositories for organization: " + organization)
@@ -72,10 +73,21 @@ func ListSecretScanning(enterprise, organization, token, url string, activate bo
 
 		enabledRepos := []string{}
 		for _, repo := range repos {
-			if repo.SecurityAndAnalysis == nil || repo.SecurityAndAnalysis.SecretScanning == nil || *repo.SecurityAndAnalysis.SecretScanning.Status != "enabled" {
+			//print repo
+
+			var repository github.Repository
+			repository, err = github.GetRepository(*repo.Name, organization, token, url)
+
+			if err != nil {
+				log.Println("[❌] Error getting repository: ", err)
+				return err
+			}
+
+			if repository.SecurityAndAnalysis == nil || repository.SecurityAndAnalysis.SecretScanning == nil || *repository.SecurityAndAnalysis.SecretScanning.Status != "enabled" {
 				continue
 			}
 
+			log.Println("Secret scanning enabled for repository: " + *repo.Name)
 			enabledRepos = append(enabledRepos, *repo.Name)
 		}
 

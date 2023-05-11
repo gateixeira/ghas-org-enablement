@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/gofri/go-github-ratelimit/github_ratelimit"
 	"github.com/google/go-github/v50/github"
@@ -16,7 +15,7 @@ type Repository github.Repository
 
 type Workflow github.Workflow
 
-const githubDelay = 720 * time.Millisecond
+//const githubDelay = 720 * time.Millisecond
 
 type BranchProtectionRule struct {
 	Nodes []struct {
@@ -49,7 +48,7 @@ var (
 func checkClients(token string, url string) error {
 
 	// Sleep to avoid hitting the API rate limit.
-	time.Sleep(githubDelay)
+	//time.Sleep(githubDelay)
 
 	if clientV3 == nil || clientV4 == nil || token != accessToken {
 		accessToken = token
@@ -136,7 +135,18 @@ func GetRepositories(org, token, url string) ([]Repository, error) {
 	}
 
 	return allReposStruct, nil
+}
 
+func GetRepository(repoName, org, token, url string) (Repository, error) {
+	checkClients(token, url)
+
+	repo, _, err := clientV3.Repositories.Get(ctx, org, repoName)
+	if err != nil {
+		log.Println("Error getting repository: ", err)
+		return Repository{}, err
+	}
+
+	return Repository(*repo), nil
 }
 
 func GetOrganizationsInEnterprise(enterprise string, token string, url string) ([]string, error) {
