@@ -57,7 +57,7 @@ func ListSecretScanning(enterprise, organization, token, url string, activate bo
 		log.Println("[✅] Done")
 	}
 
-	mapOrgAndRepos := map[string][]string{}
+	totalWithScan := 0
 	totalRepos := 0
 	for _, organization := range organizations {
 		log.Println("[🔄] Listing secret scanning for organization: " + organization)
@@ -91,25 +91,20 @@ func ListSecretScanning(enterprise, organization, token, url string, activate bo
 			enabledRepos = append(enabledRepos, *repo.Name)
 		}
 
-		mapOrgAndRepos[organization] = enabledRepos
+		result := ""
+		count := 0
+		for _, repo := range enabledRepos {
+			count++
+			result += repo + "\n"
+		}
+
+		totalWithScan += count
+		log.Println("Total repositories with secret scanning enabled in organization: ", count)
+		ioutil.WriteFile(organization+".txt", []byte(result), 0644)
+
 		log.Println("[✅] Done")
 	}
 
-	//convert mapOrgAndRepos to string
-	result := ""
-	count := 0
-	for org, repos := range mapOrgAndRepos {
-		result += org + "\n"
-		for _, repo := range repos {
-			result += "  " + repo + "\n"
-			count++
-		}
-	}
-
-	log.Printf("[✅] Done. %d repositories with secret scanning enabled out of %d", count, totalRepos)
-
-	// save to file using ioutil.WriteFile
-	ioutil.WriteFile("report.txt", []byte(result), 0644)
-
+	log.Printf("[✅] Done. %d repositories with secret scanning enabled out of %d", totalWithScan, totalRepos)
 	return nil
 }

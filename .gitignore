@@ -3,4 +3,4 @@ bin/
 ghas-org-enablement
 dist/
 .DS_Store
-report.txt
+**.txt
