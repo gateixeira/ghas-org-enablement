@@ -108,6 +108,37 @@ func ChangeGHASOrgSettings(organization string, activate bool, token string, url
 	return err
 }
 
+func GetRepositories(org, token, url string) ([]Repository, error) {
+	checkClients(token, url)
+
+	// list all repositories for the organization
+	opt := &github.RepositoryListByOrgOptions{Type: "all", ListOptions: github.ListOptions{PerPage: 10}}
+	var allRepos []*github.Repository
+	for {
+		repos, response, err := clientV3.Repositories.ListByOrg(ctx, org, opt)
+
+		logTokenRateLimit(response)
+
+		if err != nil {
+			log.Println("Error getting repositories: ", err)
+			return nil, err
+		}
+		allRepos = append(allRepos, repos...)
+		if response.NextPage == 0 {
+			break
+		}
+		opt.Page = response.NextPage
+	}
+
+	var allReposStruct []Repository
+	for _, repo := range allRepos {
+		allReposStruct = append(allReposStruct, Repository(*repo))
+	}
+
+	return allReposStruct, nil
+
+}
+
 func GetOrganizationsInEnterprise(enterprise string, token string, url string) ([]string, error) {
 	checkClients(token, url)
 
