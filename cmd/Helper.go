@@ -83,11 +83,11 @@ func ListSecretScanning(enterprise, organization, token, url string, activate bo
 				return err
 			}
 
-			if repository.SecurityAndAnalysis == nil || repository.SecurityAndAnalysis.SecretScanning == nil || *repository.SecurityAndAnalysis.SecretScanning.Status != "enabled" {
+			if repository.SecurityAndAnalysis != nil && repository.SecurityAndAnalysis.SecretScanning != nil && *repository.SecurityAndAnalysis.SecretScanning.Status == "enabled" {
 				continue
 			}
 
-			log.Println("Secret scanning enabled for repository: " + *repo.Name)
+			log.Println("Secret scanning NOT enabled for repository: " + *repo.Name)
 			enabledRepos = append(enabledRepos, *repo.Name)
 		}
 
@@ -99,12 +99,12 @@ func ListSecretScanning(enterprise, organization, token, url string, activate bo
 		}
 
 		totalWithScan += count
-		log.Println("Total repositories with secret scanning enabled in organization: ", count)
+		log.Println("Total repositories with secret scanning NOT enabled in organization: ", count)
 		ioutil.WriteFile(organization+".txt", []byte(result), 0644)
 
 		log.Println("[✅] Done")
 	}
 
-	log.Printf("[✅] Done. %d repositories with secret scanning enabled out of %d", totalWithScan, totalRepos)
+	log.Printf("[✅] Done. %d repositories with secret scanning NOT enabled out of %d", totalWithScan, totalRepos)
 	return nil
 }
