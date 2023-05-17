@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/gateixeira/ghas-org-enablement/cmd/github"
 )
@@ -114,18 +114,16 @@ func ListSecretScanning(enterprise, organization, token, url string, activate bo
 	// iterate over orgNames and append to file
 	if len(orgNames) > 0 {
 		log.Println("[🔄] Writing organizations to file...")
-		err := ioutil.WriteFile("organizations.txt", []byte("Organizations with repositories with secret scanning NOT enabled:\n"), 0644)
+
+		f, err := os.OpenFile("organizations.txt",
+			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
-			log.Println("[❌] Error writing organizations to file")
-			return err
+			log.Println(err)
 		}
+		defer f.Close()
 
 		for _, org := range orgNames {
-			err := ioutil.WriteFile("organizations.txt", []byte(org+"\n"), 0644)
-			if err != nil {
-				log.Println("[❌] Error writing organizations to file")
-				return err
-			}
+			f.WriteString(org + "\n")
 		}
 		log.Println("[✅] Done")
 	}
