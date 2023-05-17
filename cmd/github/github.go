@@ -163,8 +163,6 @@ func GetOrganizationsInEnterprise(enterprise string, token string, url string) (
 		"cursor":     (*githubv4.String)(nil),
 	}
 
-	fmt.Println(query)
-
 	results := make([]string, 0)
 	for {
 		err := clientV4.Query(ctx, &query, variables)
