@@ -59,6 +59,7 @@ func ListSecretScanning(enterprise, organization, token, url string, activate bo
 
 	totalWithScan := 0
 	totalRepos := 0
+	orgNames := []string{}
 	for _, organization := range organizations {
 		log.Println("[🔄] Listing secret scanning for organization: " + organization)
 
@@ -100,11 +101,34 @@ func ListSecretScanning(enterprise, organization, token, url string, activate bo
 
 		totalWithScan += count
 		log.Println("Total repositories with secret scanning NOT enabled in organization: ", count)
-		ioutil.WriteFile(organization+".txt", []byte(result), 0644)
+
+		if count > 0 {
+			orgNames = append(orgNames, organization)
+		}
 
 		log.Println("[✅] Done")
 	}
 
 	log.Printf("[✅] Done. %d repositories with secret scanning NOT enabled out of %d", totalWithScan, totalRepos)
+
+	// iterate over orgNames and append to file
+	if len(orgNames) > 0 {
+		log.Println("[🔄] Writing organizations to file...")
+		err := ioutil.WriteFile("organizations.txt", []byte("Organizations with repositories with secret scanning NOT enabled:\n"), 0644)
+		if err != nil {
+			log.Println("[❌] Error writing organizations to file")
+			return err
+		}
+
+		for _, org := range orgNames {
+			err := ioutil.WriteFile("organizations.txt", []byte(org+"\n"), 0644)
+			if err != nil {
+				log.Println("[❌] Error writing organizations to file")
+				return err
+			}
+		}
+		log.Println("[✅] Done")
+	}
+
 	return nil
 }
